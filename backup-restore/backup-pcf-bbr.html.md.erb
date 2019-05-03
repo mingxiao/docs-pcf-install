@@ -7,11 +7,22 @@ owner: RelEng
 
 <% $this_topic = 'backup-pcf' %>
 
-This topic describes the procedure for backing up your critical backend Pivotal Cloud Foundry (PCF) components with BOSH Backup and Restore (BBR), a command-line tool for backing up and restoring BOSH deployments. To restore your backup, see the [Restoring Pivotal Cloud Foundry from Backup with BBR](restore-pcf-bbr.html) topic.
+This topic describes the procedure for backing up your critical backend Pivotal Cloud Foundry (PCF) 
+components with BOSH Backup and Restore (BBR), a command-line tool for backing up and restoring BOSH deployments.  
+
+BOSH deployments include custom backup and restore scripts which encapsulate the correct procedure 
+for backing up and restoring that specific deployment. 
+
+BBR orchestrates running these backup and restore scripts and transfers the generated backup artifacts 
+to and from the backup repository.
+
+During a backup, BBR stops the Cloud Controller API and the Cloud Controller workers to create a consistent backup. 
+Only the API functionality, like pushing applications or using the Cloud Foundry Command Line Interface (cf CLI) are affected. 
+The deployed applications do not experience downtime.  
+
+To restore your backup, see the [Restoring Pivotal Cloud Foundry from Backup with BBR](restore-pcf-bbr.html) topic.
 
 To view the BBR release notes, see the [BOSH Backup and Restore Release Notes](https://docs.cloudfoundry.org/bbr/bbr-rn.html).
-
-During the backup, BBR stops the Cloud Controller API and the Cloud Controller workers to create a consistent backup. Only the API functionality, like pushing applications or using the Cloud Foundry Command Line Interface (cf CLI) are affected. The deployed applications do not experience downtime.
 
 <div class="note warning">
   <strong>WARNING</strong>
@@ -37,15 +48,14 @@ Pivotal recommends the following:
 
 ## <a id='supported'></a> Supported Components
 
-BBR is a binary that can back up and restore BOSH deployments and BOSH Directors.
-BBR requires that the backup targets supply scripts that implement the backup and restore functions.
+BBR is a binary that can back up and restore BOSH deployments and BOSH Directors. 
 BBR can communicate securely with external blobstores and databases, using TLS, if
-these are configured accordingly.
+these are configured accordingly.  
 
-BBR can back up the following components:
+BBR can be used to back up the following components:
 
-- [Pivotal Application Service (PAS)](#pas-support)
-- [BOSH Director](#bosh-director-support)
+  - [Pivotal Application Service (PAS)](#pas-support)
+  - [BOSH Director](#bosh-director-support)  
 
 ### <a id='pas-support'></a> PAS
 
@@ -78,7 +88,7 @@ of _Configuring Cloud Foundry for BOSH Backup and Restore_ in the Cloud Foundry 
   <a href="#version-compatibility">External Storage Support Across PCF Versions</a>.
 </p>
 
-## <a id="version-compatibility"></a> External Storage Support Across PCF Versions
+### <a id="version-compatibility"></a> External Storage Support Across PCF Versions
 
 The following table shows what types of external databases and blobstores you can back up and
 restore with BBR.
@@ -186,7 +196,18 @@ restore with BBR.
   </tr>
 </table>
 
-## <a id="guidelines"></a> Unsupported External Blobstores and Databases in PAS
+## <a id='unsupported'></a> Unsupported Components
+
+BBR requires that the backup-target supply scripts to implement backup and restore functions.
+
+BBR can not be used to back up the following components:
+
+  - Harbor tile
+  - Cloud provider objects:  
+    * Persistent volumes  
+    * Network resources
+
+### <a id="guidelines"></a> Unsupported External Blobstores and Databases in PAS
 
 If you configured an unsupported external blobstore or an unsupported external database in PAS, see the following guidelines to perform a backup successfully:
 
@@ -240,13 +261,29 @@ The following diagram shows a sample backup flow.
 
 ## <a id='prepare'></a> Preparing to Create Your Backup
 
-### <a id='setup-jumpbox'></a> Step 1: Set Up Your Jumpbox
-
 You must have a jumpbox before you can install BBR to the jumpbox. A jumpbox is a separate,
 hardened server on your network that provides a controlled means of access to the VMs other
 computers on your network.
 
-Pivotal recommends using the Ops Manager VM as your jumpbox. If you use the Ops Manager VM as your jumpbox, 
+<p class="note"><strong>Note</strong>: Pivotal recommends using the Ops Manager VM as your jumpbox.
+</p>
+
+
+### <a id='jumpbox-reqs'></a> Jumpbox Requirements
+Your jumpbox host must met the following minimum requirements to be used for BBR backups:  
+
+* Must be able to communicate with the network that contains your BOSH Director and Enterprise PKS deployment.  
+* Must have sufficient space for the backup.  
+* Must be in the same network as the deployed VMs because BBR connects to the VMs at their private IP addresses.  
+
+Additional considerations when selecting a jumpbox host:  
+
+* BBR backup and restore processes require minimal network latency between the VMs and the jumpbox to reduce transfer times.  
+* BBR uses SSH to orchestrate the backup of your instances by using port 22 by default.  
+* BBR does not support SSH gateways.  
+
+### <a id='setup-jumpbox'></a> Step 1: Set Up Your Jumpbox
+If you use the Ops Manager VM as your jumpbox, 
 the path to the root Certificate Authority (CA) certificate is:
 
 ```
@@ -286,8 +323,8 @@ Perform the following steps to confirm that your BOSH Director is reachable and 
 
 There are two ways to retrieve your BOSH Director credentials:
 
-* Ops Manager Installation Dashboard.  
-* Ops Manager API.
+* Ops Manager Installation Dashboard  
+* Ops Manager API
 
 1. To retrieve your BOSH Director credentials using the Ops Manager Installation Dashboard, perform the following steps:
     1. Navigate to the Ops Manager Installation Dashboard.
