@@ -8,17 +8,18 @@ owner: RelEng
 <% $this_topic = 'backup-pcf' %>
 
 This topic describes the procedure for backing up your critical backend Pivotal Cloud Foundry (PCF) 
-components with BOSH Backup and Restore (BBR), a command-line tool for backing up and restoring BOSH deployments.  
+components with BOSH Backup and Restore (BBR), a command-line tool for backing up and restoring 
+BOSH deployments and BOSH Directors.  
 
-BOSH deployments include custom backup and restore scripts which encapsulate the correct procedure 
+Each BOSH deployment includes custom backup and restore scripts which encapsulate the correct procedure 
 for backing up and restoring that specific deployment. 
 
-BBR orchestrates running these backup and restore scripts and transfers the generated backup artifacts 
-to and from the backup repository.
+BBR orchestrates running these customized backup and restore scripts and transfers the generated backup artifacts 
+to and from a backup repository.
 
-During a backup, BBR stops the Cloud Controller API and the Cloud Controller workers to create a consistent backup. 
-Only the API functionality, like pushing applications or using the Cloud Foundry Command Line Interface (cf CLI) are affected. 
-The deployed applications do not experience downtime.  
+Deployed applications do not experience downtime during BBR backup processing. 
+However BBR does stop the Cloud Controller API and the Cloud Controller workers to create a consistent backup. 
+Only API functionality, e.g., pushing applications and using the Cloud Foundry Command Line Interface (cf CLI), are affected. 
 
 To restore your backup, see the [Restoring Pivotal Cloud Foundry from Backup with BBR](restore-pcf-bbr.html) topic.
 
@@ -48,7 +49,6 @@ Pivotal recommends the following:
 
 ## <a id='supported'></a> Supported Components
 
-BBR is a binary that can back up and restore BOSH deployments and BOSH Directors. 
 BBR can communicate securely with external blobstores and databases, using TLS, if
 these are configured accordingly.  
 
@@ -270,7 +270,7 @@ computers on your network.
 
 
 ### <a id='jumpbox-reqs'></a> Jumpbox Requirements
-Your jumpbox host must met the following minimum requirements to be used for BBR backups:  
+Your jumpbox host must meet the following minimum requirements to be used for BBR backups:  
 
 * Must be able to communicate with the network that contains your BOSH Director and Enterprise PKS deployment.  
 * Must have sufficient space for the backup.  
